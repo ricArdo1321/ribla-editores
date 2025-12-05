@@ -3,7 +3,7 @@ import { COLORS } from '../constants';
 
 const Hero: React.FC = () => {
   return (
-    <section className="relative w-full h-[95vh] flex flex-col pt-16">
+    <section className="relative w-full min-h-[95vh] md:h-[95vh] flex flex-col pt-16">
       
       {/* Top White Area (Content) */}
       <div className="flex-grow relative w-full bg-white">
@@ -19,7 +19,7 @@ const Hero: React.FC = () => {
             </span>
             <h1 
               id="hero-main-title"
-              className="text-5xl md:text-7xl lg:text-8xl font-thin tracking-tight leading-[0.9] mb-4"
+              className="text-5xl md:text-7xl lg:text-8xl font-thin tracking-tight leading-[0.9] mb-4 break-words"
               style={{ color: COLORS.ashGray }}
             >
               Ribla Editores

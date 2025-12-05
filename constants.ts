@@ -16,6 +16,15 @@ export interface Book {
   year: number;
 }
 
+export interface BlogPost {
+  id: number;
+  title: string;
+  category: string;
+  date: string;
+  excerpt: string;
+  imageUrl: string;
+}
+
 export const CATALOG: Book[] = [
   {
     id: 1,
@@ -67,11 +76,30 @@ export const CATALOG: Book[] = [
   }
 ];
 
+export const JOURNAL_POSTS: BlogPost[] = [
+  {
+    id: 1,
+    title: "El papel en la era de la pantalla infinita",
+    category: "Reflexiones",
+    date: "OCT 2025",
+    excerpt: "¿Tiene sentido seguir imprimiendo cuando todo está en la nube? Una defensa de la materialidad del libro.",
+    imageUrl: "https://picsum.photos/seed/journal1/800/500"
+  },
+  {
+    id: 2,
+    title: "Conversación con Elena Varela",
+    category: "Entrevistas",
+    date: "SEP 2025",
+    excerpt: "La autora de 'El Silencio de los Algoritmos' nos habla sobre la ética en la inteligencia artificial.",
+    imageUrl: "https://picsum.photos/seed/journal2/800/500"
+  }
+];
+
 export const NAV_LINKS = [
   { name: 'Inicio', href: '#' },
   { name: 'Sobre nosotros', href: '#about' },
   { name: 'Catálogo', href: '#catalog' },
+  { name: 'Journal', href: '#journal' },
   { name: 'Tienda', href: '#' },
-  { name: 'Autores', href: '#' },
   { name: 'Contacto', href: '#footer' },
 ];

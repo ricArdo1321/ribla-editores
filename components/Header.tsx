@@ -10,21 +10,21 @@ const Header: React.FC = () => {
     const heroTitle = document.getElementById('hero-main-title');
     
     if (!heroTitle) {
-      // If hero title isn't found (e.g. on a different page structure), show logo by default
       setShowLogo(true);
       return;
     }
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        // If hero title is NOT intersecting (it has disappeared from view), show the header logo.
-        // If it IS intersecting (visible), hide the header logo.
+        // Show logo when hero title is NOT intersecting (scrolled out of view)
+        // Hide logo when hero title IS intersecting (visible in view)
         setShowLogo(!entry.isIntersecting);
       },
       {
         threshold: 0,
-        // Optional margin to fine-tune when it disappears relative to the header
-        rootMargin: '-20px 0px 0px 0px' 
+        // Negative top margin equal to header height (h-16 = 64px)
+        // This ensures the logic triggers exactly when the element disappears behind the sticky header
+        rootMargin: '-64px 0px 0px 0px' 
       }
     );
 
@@ -47,7 +47,7 @@ const Header: React.FC = () => {
           <div className="flex-1 flex justify-start">
             <a 
               href="#" 
-              className={`uppercase tracking-[0.2em] font-light text-sm md:text-base transition-all duration-500 ${showLogo ? 'opacity-100 hover:opacity-70' : 'opacity-0 pointer-events-none'}`}
+              className={`uppercase tracking-[0.2em] font-light text-sm md:text-base transition-all duration-500 transform ${showLogo ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2 pointer-events-none'}`}
               style={{ color: COLORS.ashGray }}
             >
               Ribla Editores
