@@ -25,6 +25,13 @@ export interface BlogPost {
   imageUrl: string;
 }
 
+export interface Service {
+  id: number;
+  title: string;
+  description: string;
+  detail: string;
+}
+
 export const CATALOG: Book[] = [
   {
     id: 1,
@@ -95,11 +102,33 @@ export const JOURNAL_POSTS: BlogPost[] = [
   }
 ];
 
+export const SERVICES: Service[] = [
+  {
+    id: 1,
+    title: "Corrección Profesional",
+    description: "Ortotipografía y estilo para pulir el texto respetando la voz del autor.",
+    detail: "Desde manuscritos académicos hasta narrativa experimental."
+  },
+  {
+    id: 2,
+    title: "Diseño Editorial",
+    description: "Maquetación interior y diseño de cubiertas con sensibilidad tipográfica.",
+    detail: "Cuidamos el blanco de la página tanto como la tinta."
+  },
+  {
+    id: 3,
+    title: "Mentoring Literario",
+    description: "Acompañamiento creativo y estructural para obras en desarrollo.",
+    detail: "Informes de lectura profundos y honestos."
+  }
+];
+
 export const NAV_LINKS = [
   { name: 'Inicio', href: '#' },
   { name: 'Sobre nosotros', href: '#about' },
   { name: 'Catálogo', href: '#catalog' },
   { name: 'Journal', href: '#journal' },
+  { name: 'Servicios', href: '#services' },
   { name: 'Tienda', href: '#' },
   { name: 'Contacto', href: '#footer' },
 ];
