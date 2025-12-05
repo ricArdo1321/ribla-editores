@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, User, ShoppingBag, X } from 'lucide-react';
+import { User, ShoppingBag, X } from 'lucide-react';
 import { COLORS, NAV_LINKS } from '../constants';
 
 const Header: React.FC = () => {
@@ -67,9 +67,6 @@ const Header: React.FC = () => {
 
           {/* Right: Icons */}
           <div className="flex-1 flex justify-end gap-6">
-            <button className="hover:text-[#D96B27] transition-colors" style={{ color: COLORS.ashGray }}>
-              <Search size={18} strokeWidth={1.5} />
-            </button>
             <button className="hidden md:block hover:text-[#D96B27] transition-colors" style={{ color: COLORS.ashGray }}>
               <User size={18} strokeWidth={1.5} />
             </button>

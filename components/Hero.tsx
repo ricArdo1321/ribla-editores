@@ -1,7 +1,26 @@
-import React from 'react';
-import { COLORS } from '../constants';
+import React, { useState, useEffect } from 'react';
+import { COLORS, CATALOG } from '../constants';
 
 const Hero: React.FC = () => {
+  const [count, setCount] = useState(0);
+  const currentYear = new Date().getFullYear();
+
+  useEffect(() => {
+    // Animation configuration
+    const target = CATALOG.length;
+    const duration = 1200; // 1.2 seconds total animation
+    const intervalTime = duration / target;
+    
+    let current = 0;
+    const timer = setInterval(() => {
+      current += 1;
+      setCount(current);
+      if (current >= target) clearInterval(timer);
+    }, intervalTime);
+
+    return () => clearInterval(timer);
+  }, []);
+
   return (
     <section className="relative w-full min-h-[95vh] md:h-[95vh] flex flex-col pt-16">
       
@@ -28,18 +47,20 @@ const Hero: React.FC = () => {
               Literatura, ciencia y cultura digital para un mundo diverso.
             </p>
             <p className="text-xs text-gray-400 font-light italic">
-              Un catálogo pequeño, escogido a mano: solo 6 libros para empezar.
+              Un catálogo escogido a mano.
             </p>
           </div>
 
           {/* Center/Right Product Card Block */}
           <div className="absolute top-1/2 right-6 md:right-24 transform -translate-y-1/2 text-right">
             <h2 className="text-lg md:text-xl font-normal tracking-wide" style={{ color: COLORS.ashGray }}>
-              Catálogo 01
+              Catálogo
             </h2>
             <div className="text-sm font-light text-gray-400 mt-1 mb-6 space-y-1">
-              <p>Seis títulos</p>
-              <p>Edición 2025</p>
+              <p className="tabular-nums">
+                {count} {count === 1 ? 'título' : 'títulos'}
+              </p>
+              <p>Edición {currentYear}</p>
             </div>
             
             <a 
@@ -50,7 +71,7 @@ const Hero: React.FC = () => {
                 borderRadius: '2px'
               }}
             >
-              Ver los 6 libros
+              Libros
             </a>
           </div>
 
