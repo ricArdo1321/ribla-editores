@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState, useEffect } from 'react';
 import { User, ShoppingBag, X } from 'lucide-react';
 import { COLORS, NAV_LINKS } from '../constants';
@@ -8,7 +10,7 @@ const Header: React.FC = () => {
 
   useEffect(() => {
     const heroTitle = document.getElementById('hero-main-title');
-    
+
     if (!heroTitle) {
       setShowLogo(true);
       return;
@@ -16,15 +18,11 @@ const Header: React.FC = () => {
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        // Show logo when hero title is NOT intersecting (scrolled out of view)
-        // Hide logo when hero title IS intersecting (visible in view)
         setShowLogo(!entry.isIntersecting);
       },
       {
         threshold: 0,
-        // Negative top margin equal to header height (h-16 = 64px)
-        // This ensures the logic triggers exactly when the element disappears behind the sticky header
-        rootMargin: '-64px 0px 0px 0px' 
+        rootMargin: '-64px 0px 0px 0px'
       }
     );
 
@@ -37,16 +35,16 @@ const Header: React.FC = () => {
 
   return (
     <>
-      <header 
+      <header
         className="fixed top-0 left-0 w-full z-50 bg-white transition-all duration-300"
         style={{ borderTop: `4px solid ${COLORS.desertSand}` }}
       >
         <div className="max-w-[1920px] mx-auto px-6 h-16 flex items-center justify-between">
-          
+
           {/* Left: Logo - Conditional Visibility */}
           <div className="flex-1 flex justify-start">
-            <a 
-              href="#" 
+            <a
+              href="#"
               className={`uppercase tracking-[0.2em] font-light text-sm md:text-base transition-all duration-500 transform ${showLogo ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2 pointer-events-none'}`}
               style={{ color: COLORS.ashGray }}
             >
@@ -56,7 +54,7 @@ const Header: React.FC = () => {
 
           {/* Center: Menu Trigger */}
           <div className="flex-1 flex justify-center">
-            <button 
+            <button
               onClick={() => setIsMenuOpen(true)}
               className="uppercase text-xs tracking-widest font-normal hover:text-[#D96B27] transition-colors"
               style={{ color: COLORS.ashGray }}
@@ -78,11 +76,11 @@ const Header: React.FC = () => {
       </header>
 
       {/* Off-canvas Menu Overlay */}
-      <div 
+      <div
         className={`fixed inset-0 z-[60] bg-white transition-transform duration-500 ease-[bezier(0.76,0,0.24,1)] ${isMenuOpen ? 'translate-y-0' : '-translate-y-full'}`}
       >
         <div className="absolute top-0 right-0 p-6">
-          <button 
+          <button
             onClick={() => setIsMenuOpen(false)}
             className="p-2 hover:rotate-90 transition-transform duration-300"
             style={{ color: COLORS.ashGray }}
@@ -94,7 +92,7 @@ const Header: React.FC = () => {
         <div className="h-full flex flex-col items-center justify-center">
           <nav className="flex flex-col items-center gap-8">
             {NAV_LINKS.map((link) => (
-              <a 
+              <a
                 key={link.name}
                 href={link.href}
                 onClick={() => setIsMenuOpen(false)}

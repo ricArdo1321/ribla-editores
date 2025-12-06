@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState, useEffect } from 'react';
 import { COLORS, CATALOG } from '../constants';
 
@@ -6,11 +8,10 @@ const Hero: React.FC = () => {
   const currentYear = new Date().getFullYear();
 
   useEffect(() => {
-    // Animation configuration
     const target = CATALOG.length;
-    const duration = 1200; // 1.2 seconds total animation
+    const duration = 1200;
     const intervalTime = duration / target;
-    
+
     let current = 0;
     const timer = setInterval(() => {
       current += 1;
@@ -23,20 +24,20 @@ const Hero: React.FC = () => {
 
   return (
     <section className="relative w-full min-h-[95vh] md:h-[95vh] flex flex-col pt-16">
-      
+
       {/* Top White Area (Content) */}
       <div className="flex-grow relative w-full bg-white">
         <div className="max-w-[1400px] mx-auto h-full px-6 md:px-12 relative">
-          
+
           {/* Bottom Left Content Block */}
           <div className="absolute bottom-12 md:bottom-20 left-6 md:left-12 max-w-lg z-10">
-            <span 
+            <span
               className="inline-block text-[10px] md:text-xs tracking-[0.25em] font-medium mb-4"
               style={{ color: COLORS.araucariaGreen }}
             >
               EDITORIAL EMERGENTE
             </span>
-            <h1 
+            <h1
               id="hero-main-title"
               className="text-5xl md:text-7xl lg:text-8xl font-thin tracking-tight leading-[0.9] mb-4 break-words"
               style={{ color: COLORS.ashGray }}
@@ -62,11 +63,11 @@ const Hero: React.FC = () => {
               </p>
               <p>Edición {currentYear}</p>
             </div>
-            
-            <a 
+
+            <a
               href="#catalog"
               className="inline-block px-6 py-3 text-xs tracking-widest text-white transition-all hover:opacity-90 hover:scale-105"
-              style={{ 
+              style={{
                 backgroundColor: COLORS.terracotta,
                 borderRadius: '2px'
               }}
@@ -80,8 +81,8 @@ const Hero: React.FC = () => {
 
       {/* Bottom Cropped Image */}
       <div className="h-[35vh] w-full overflow-hidden">
-        <img 
-          src="https://picsum.photos/seed/papertexture2/1920/800" 
+        <img
+          src="https://picsum.photos/seed/papertexture2/1920/800"
           alt="Detalle editorial"
           className="w-full h-full object-cover object-bottom opacity-90 grayscale-[20%]"
         />

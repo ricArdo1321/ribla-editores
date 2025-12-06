@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState } from 'react';
 import { COLORS } from '../constants';
 import { supabase } from '../lib/supabaseClient';
