@@ -7,20 +7,7 @@ import { useCan } from '@/hooks/useAuthorization';
 import EditorHeader from '@/components/editor/EditorHeader';
 import DocumentEditor from '@/components/editor/DocumentEditor';
 import { Loader2, X, CheckCircle, AlertCircle } from 'lucide-react';
-import { supabase } from '@/lib/supabaseClient';
-
-// Helper to generate slug from title
-function generateSlug(title: string): string {
-    return title
-        .toLowerCase()
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '') // Remove accents
-        .replace(/[^a-z0-9\s-]/g, '') // Remove special chars
-        .replace(/\s+/g, '-') // Replace spaces with -
-        .replace(/-+/g, '-') // Replace multiple - with single -
-        .trim()
-        .substring(0, 100) + '-' + Date.now().toString(36); // Add unique suffix
-}
+import { sanitizeContent } from '@/lib/sanitize';
 
 export default function EditorPage() {
     const router = useRouter();
@@ -46,38 +33,39 @@ export default function EditorPage() {
 
     // Save as draft
     const saveDraft = async () => {
-        if (!title.trim() || !user) return;
+        if (!title.trim()) return;
 
         setIsSaving(true);
         try {
-            const postData = {
-                title: title.trim(),
-                slug: postId ? undefined : generateSlug(title), // Only generate slug on first save
-                content: content,
-                excerpt: content.replace(/<[^>]*>/g, '').substring(0, 200), // Strip HTML for excerpt
-                author_id: user.id,
-                status: 'draft',
-                updated_at: new Date().toISOString(),
-            };
+            const token = localStorage.getItem('wp_token');
+            if (!token) throw new Error('No authenticated');
+
+            const { getAuthClient } = await import('@/lib/wordpress');
+            const { CREATE_POST_MUTATION, UPDATE_POST_MUTATION } = await import('@/lib/mutations');
+
+            const client = getAuthClient(token);
+
+            let data: any;
 
             if (postId) {
                 // Update existing post
-                const { error } = await supabase
-                    .from('posts')
-                    .update(postData)
-                    .eq('id', postId);
-
-                if (error) throw error;
+                data = await client.request(UPDATE_POST_MUTATION, {
+                    id: postId,
+                    title: title.trim(),
+                    content: content,
+                    status: 'DRAFT'
+                });
             } else {
                 // Create new post
-                const { data, error } = await supabase
-                    .from('posts')
-                    .insert({ ...postData, slug: generateSlug(title) })
-                    .select()
-                    .single();
+                data = await client.request(CREATE_POST_MUTATION, {
+                    title: title.trim(),
+                    content: content,
+                    status: 'DRAFT'
+                });
 
-                if (error) throw error;
-                if (data) setPostId(data.id);
+                if (data?.createPost?.post?.id) {
+                    setPostId(data.createPost.post.id);
+                }
             }
 
             setLastSaved(new Date());
@@ -150,41 +138,38 @@ export default function EditorPage() {
             showNotification('error', 'Por favor, añade contenido al post');
             return;
         }
-        if (!user) {
-            showNotification('error', 'Debes iniciar sesión para publicar');
-            return;
-        }
 
         setIsPublishing(true);
         try {
-            const postData = {
-                title: title.trim(),
-                content: content,
-                excerpt: content.replace(/<[^>]*>/g, '').substring(0, 200),
-                author_id: user.id,
-                status: 'published',
-                published_at: new Date().toISOString(),
-                updated_at: new Date().toISOString(),
-            };
+            const token = localStorage.getItem('wp_token');
+            if (!token) throw new Error('No authenticated');
+
+            const { getAuthClient } = await import('@/lib/wordpress');
+            const { CREATE_POST_MUTATION, UPDATE_POST_MUTATION } = await import('@/lib/mutations');
+
+            const client = getAuthClient(token);
+
+            let data: any;
 
             if (postId) {
                 // Update existing post to published
-                const { error } = await supabase
-                    .from('posts')
-                    .update(postData)
-                    .eq('id', postId);
-
-                if (error) throw error;
+                data = await client.request(UPDATE_POST_MUTATION, {
+                    id: postId,
+                    title: title.trim(),
+                    content: content,
+                    status: 'PUBLISH'
+                });
             } else {
                 // Create and publish new post
-                const { data, error } = await supabase
-                    .from('posts')
-                    .insert({ ...postData, slug: generateSlug(title) })
-                    .select()
-                    .single();
+                data = await client.request(CREATE_POST_MUTATION, {
+                    title: title.trim(),
+                    content: content,
+                    status: 'PUBLISH'
+                });
 
-                if (error) throw error;
-                if (data) setPostId(data.id);
+                if (data?.createPost?.post?.id) {
+                    setPostId(data.createPost.post.id);
+                }
             }
 
             showNotification('success', '¡Post publicado exitosamente!');
@@ -286,7 +271,7 @@ export default function EditorPage() {
 
                                     {/* Content */}
                                     <div
-                                        dangerouslySetInnerHTML={{ __html: content || '<p>Sin contenido</p>' }}
+                                        dangerouslySetInnerHTML={{ __html: sanitizeContent(content || '<p>Sin contenido</p>') }}
                                     />
                                 </article>
                             </div>

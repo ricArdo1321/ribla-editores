@@ -5,18 +5,20 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Clock, BookOpen, Loader2 } from 'lucide-react';
 import { COLORS } from '@/constants';
-import { supabase } from '@/lib/supabaseClient';
+import { wpClient } from '@/lib/wordpress';
+import { GET_POST_BY_SLUG } from '@/lib/queries';
+import { sanitizeContent } from '@/lib/sanitize';
 
 interface Post {
     id: string;
     title: string;
     slug: string;
-    content: string;
-    excerpt: string;
-    category: string;
-    published_at: string;
+    content: string | null;
+    excerpt: string | null;
+    category: string | null;
+    published_at: string | null;
     author: {
-        full_name: string;
+        full_name: string | null;
     } | null;
 }
 
@@ -44,18 +46,28 @@ export default function BlogPostPage() {
     useEffect(() => {
         const fetchPost = async () => {
             try {
-                const { data, error } = await supabase
-                    .from('posts')
-                    .select('*, author:profiles(full_name)')
-                    .eq('slug', slug)
-                    .eq('status', 'published')
-                    .single();
+                const data: any = await wpClient.request(GET_POST_BY_SLUG, { slug });
 
-                if (error) throw error;
-                setPost(data);
+                if (data?.post) {
+                    const mappedPost: Post = {
+                        id: data.post.id,
+                        title: data.post.title,
+                        slug: slug,
+                        content: data.post.content,
+                        excerpt: null, // Single post query often doesn't need excerpt, usually in content
+                        category: data.post.categories?.nodes[0]?.name || 'General',
+                        published_at: data.post.date,
+                        author: {
+                            full_name: data.post.author?.node?.name || 'Autor'
+                        }
+                    };
+                    setPost(mappedPost);
+                } else {
+                    setError('Post no encontrado');
+                }
             } catch (err: any) {
-                console.error('Error fetching post:', err);
-                setError('No se encontró el artículo');
+                console.error('Error fetching post from WP:', err);
+                setError('Error al cargar el artículo');
             } finally {
                 setIsLoading(false);
             }
@@ -116,7 +128,7 @@ export default function BlogPostPage() {
     }
 
     const readingTime = calculateReadingTime(post.content || '');
-    const formattedDate = new Date(post.published_at).toLocaleDateString('es-ES', {
+    const formattedDate = new Date(post.published_at || new Date().toISOString()).toLocaleDateString('es-ES', {
         day: 'numeric',
         month: 'long',
         year: 'numeric'
@@ -199,7 +211,7 @@ export default function BlogPostPage() {
                     {/* Content */}
                     <div
                         className="reading-content"
-                        dangerouslySetInnerHTML={{ __html: post.content || '' }}
+                        dangerouslySetInnerHTML={{ __html: sanitizeContent(post.content || '') }}
                     />
 
                     {/* End of Article */}

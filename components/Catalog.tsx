@@ -3,7 +3,9 @@
 import React, { useEffect, useState } from 'react';
 import { ArrowRight } from 'lucide-react';
 import { CATALOG, COLORS } from '../constants';
-import { supabase } from '@/lib/supabaseClient';
+import Image from 'next/image';
+import { wpClient } from '@/lib/wordpress';
+import { GET_BOOKS } from '@/lib/queries';
 
 interface Book {
   id: string;
@@ -11,7 +13,7 @@ interface Book {
   author: string;
   category: string;
   cover_url: string | null;
-  status: string;
+  status: string | null;
 }
 
 const Catalog: React.FC = () => {
@@ -21,18 +23,21 @@ const Catalog: React.FC = () => {
   useEffect(() => {
     const fetchBooks = async () => {
       try {
-        const { data, error } = await supabase
-          .from('books')
-          .select('id, title, author, category, cover_url, status')
-          .eq('status', 'published')
-          .order('created_at', { ascending: false })
-          .limit(6);
+        const data: any = await wpClient.request(GET_BOOKS, { first: 6 });
 
-        if (!error && data) {
-          setDbBooks(data);
+        if (data?.libros?.nodes) {
+          const mappedBooks: Book[] = data.libros.nodes.map((node: any) => ({
+            id: node.id,
+            title: node.title,
+            author: node.libroMeta?.autor || 'Autor desconocido',
+            category: node.libroMeta?.genero || 'General',
+            cover_url: node.featuredImage?.node?.sourceUrl || null,
+            status: 'published', // WP posts in public query are published
+          }));
+          setDbBooks(mappedBooks);
         }
       } catch (err) {
-        console.error('Error fetching books:', err);
+        console.error('Error fetching books from WP:', err);
       } finally {
         setIsLoading(false);
       }
@@ -79,10 +84,12 @@ const Catalog: React.FC = () => {
 
               {/* Cover */}
               <div className="w-full aspect-[2/3] bg-gray-50 mb-6 overflow-hidden relative">
-                <img
+                <Image
                   src={book.coverUrl}
                   alt={book.title}
-                  className="w-full h-full object-cover grayscale-[10%] group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700 ease-out"
+                  fill
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  className="object-cover grayscale-[10%] group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700 ease-out"
                 />
               </div>
 

@@ -2,18 +2,20 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { ArrowRight, Loader2 } from 'lucide-react';
 import { COLORS, JOURNAL_POSTS } from '../constants';
-import { supabase } from '@/lib/supabaseClient';
+import { wpClient } from '@/lib/wordpress';
+import { GET_POSTS } from '@/lib/queries';
 
 interface Post {
   id: string;
   title: string;
   slug: string;
-  excerpt: string;
-  category: string;
+  excerpt: string | null;
+  category: string | null;
   cover_image: string | null;
-  published_at: string;
+  published_at: string | null;
 }
 
 const Journal: React.FC = () => {
@@ -23,17 +25,22 @@ const Journal: React.FC = () => {
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const { data, error } = await supabase
-          .from('posts')
-          .select('id, title, slug, excerpt, category, cover_image, published_at')
-          .eq('status', 'published')
-          .order('published_at', { ascending: false })
-          .limit(4);
+        const data: any = await wpClient.request(GET_POSTS, { first: 4 });
 
-        if (error) throw error;
-        if (data) setPosts(data);
+        if (data?.posts?.nodes) {
+          const mappedPosts: Post[] = data.posts.nodes.map((node: any) => ({
+            id: node.id,
+            title: node.title,
+            slug: node.slug,
+            excerpt: node.excerpt ? node.excerpt.replace(/<[^>]+>/g, '') : null, // Strip HTML from excerpt
+            category: node.categories?.nodes[0]?.name || 'General',
+            cover_image: node.featuredImage?.node?.sourceUrl || null,
+            published_at: node.date,
+          }));
+          setPosts(mappedPosts);
+        }
       } catch (err) {
-        console.error('Error fetching posts:', err);
+        console.error('Error fetching posts from WP:', err);
       } finally {
         setIsLoading(false);
       }
@@ -87,10 +94,12 @@ const Journal: React.FC = () => {
                 <article className="group cursor-pointer">
                   <div className="overflow-hidden mb-6 aspect-[16/9] w-full bg-gray-100">
                     {post.cover_image ? (
-                      <img
+                      <Image
                         src={post.cover_image}
                         alt={post.title}
-                        className="w-full h-full object-cover grayscale-[20%] group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700 ease-out"
+                        fill
+                        sizes="(max-width: 768px) 100vw, 50vw"
+                        className="object-cover grayscale-[20%] group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700 ease-out"
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
@@ -105,7 +114,7 @@ const Journal: React.FC = () => {
                     </span>
                     <span className="w-px h-3 bg-gray-300"></span>
                     <span className="text-[10px] tracking-widest text-gray-400">
-                      {formatDate(post.published_at)}
+                      {formatDate(post.published_at || new Date().toISOString())}
                     </span>
                   </div>
 

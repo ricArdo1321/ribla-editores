@@ -11,6 +11,16 @@ const nextConfig = {
                 hostname: 'riblaeditores.com',
                 pathname: '/wp-content/uploads/**',
             },
+            {
+                protocol: 'https',
+                hostname: '*.supabase.co',
+                pathname: '/storage/v1/object/public/**',
+            },
+            {
+                protocol: 'https',
+                hostname: 'galxhiecepfemzxeovny.supabase.co',
+                pathname: '/storage/v1/object/public/**',
+            },
         ],
     },
 };

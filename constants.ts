@@ -39,7 +39,7 @@ export const CATALOG: Book[] = [
     author: "Elena Varela",
     genre: "Ensayo Digital",
     year: 2025,
-    coverUrl: "https://picsum.photos/seed/book1/600/900"
+    coverUrl: "/images/placeholder-book.jpg"
   },
   {
     id: 2,
@@ -47,7 +47,7 @@ export const CATALOG: Book[] = [
     author: "Javier M. Sola",
     genre: "Poesía",
     year: 2025,
-    coverUrl: "https://picsum.photos/seed/book2/600/900"
+    coverUrl: "/images/placeholder-book.jpg"
   },
   {
     id: 3,
@@ -90,7 +90,7 @@ export const JOURNAL_POSTS: BlogPost[] = [
     category: "Reflexiones",
     date: "OCT 2025",
     excerpt: "¿Tiene sentido seguir imprimiendo cuando todo está en la nube? Una defensa de la materialidad del libro.",
-    imageUrl: "https://picsum.photos/seed/journal1/800/500"
+    imageUrl: "/images/placeholder-book.jpg"
   },
   {
     id: 2,
@@ -98,7 +98,7 @@ export const JOURNAL_POSTS: BlogPost[] = [
     category: "Entrevistas",
     date: "SEP 2025",
     excerpt: "La autora de 'El Silencio de los Algoritmos' nos habla sobre la ética en la inteligencia artificial.",
-    imageUrl: "https://picsum.photos/seed/journal2/800/500"
+    imageUrl: "/images/placeholder-book.jpg"
   }
 ];
 

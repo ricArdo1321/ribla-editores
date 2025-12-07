@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { COLORS, CATALOG } from '../constants';
 
 const Hero: React.FC = () => {
@@ -80,11 +81,13 @@ const Hero: React.FC = () => {
       </div>
 
       {/* Bottom Cropped Image */}
-      <div className="h-[35vh] w-full overflow-hidden">
-        <img
+      <div className="h-[35vh] w-full overflow-hidden relative">
+        <Image
           src="https://picsum.photos/seed/papertexture2/1920/800"
           alt="Detalle editorial"
-          className="w-full h-full object-cover object-bottom opacity-90 grayscale-[20%]"
+          fill
+          priority
+          className="object-cover object-bottom opacity-90 grayscale-[20%]"
         />
       </div>
 

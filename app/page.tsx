@@ -7,6 +7,8 @@ import Newsletter from '@/components/Newsletter';
 import About from '@/components/About';
 import Footer from '@/components/Footer';
 
+export const revalidate = 3600; // ISR: Revalidate every hour
+
 export default function Home() {
     return (
         <>

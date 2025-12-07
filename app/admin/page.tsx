@@ -21,7 +21,6 @@ import {
     ChevronRight,
     Loader2
 } from 'lucide-react';
-import { supabase } from '@/lib/supabaseClient';
 
 // Types
 interface Profile {
@@ -103,8 +102,8 @@ export default function AdminDashboard() {
     const [userTab, setUserTab] = React.useState<'admins' | 'collaborators'>('admins');
 
     // Data State
-    const [profiles, setProfiles] = React.useState<Profile[]>([]);
-    const [posts, setPosts] = React.useState<Post[]>([]);
+    const [profiles, setProfiles] = React.useState<any[]>([]);
+    const [posts, setPosts] = React.useState<any[]>([]);
     const [stats, setStats] = React.useState({ posts: 0, users: 0, drafts: 0 });
     const [isFetching, setIsFetching] = React.useState(true);
 
@@ -114,27 +113,57 @@ export default function AdminDashboard() {
             if (!user) return;
 
             try {
-                // Fetch Profiles
-                const { data: profilesData } = await supabase
-                    .from('profiles')
-                    .select('*')
-                    .order('created_at', { ascending: false });
+                // Fetch WP Data using authenticated client
+                const token = localStorage.getItem('wp_token');
+                if (!token) return;
 
-                if (profilesData) setProfiles(profilesData as any); // Cast for simplicity if types mismatch slightly
+                const { getAuthClient } = await import('@/lib/wordpress');
+                const { GET_ALL_POSTS_ADMIN, GET_USERS_ADMIN } = await import('@/lib/queries');
 
-                // Fetch Posts
-                const { data: postsData } = await supabase
-                    .from('posts')
-                    .select('*, author:profiles(full_name)')
-                    .order('created_at', { ascending: false });
+                const client = getAuthClient(token);
 
-                if (postsData) setPosts(postsData as any);
+                // Parallel fetch
+                const [postsData, usersData] = await Promise.all([
+                    client.request(GET_ALL_POSTS_ADMIN),
+                    client.request(GET_USERS_ADMIN)
+                ]);
+
+                const fetchedPosts = (postsData as any).posts?.nodes || [];
+                const fetchedUsers = (usersData as any).users?.nodes || [];
+
+                // Transform Posts
+                const mappedPosts = fetchedPosts.map((p: any) => ({
+                    id: p.id,
+                    title: p.title,
+                    status: p.status?.toLowerCase(),
+                    created_at: p.date,
+                    author: { full_name: p.author?.node?.name || 'Autor' }
+                }));
+
+                setPosts(mappedPosts);
+
+                // Transform Users
+                const mappedUsers = fetchedUsers.map((u: any) => {
+                    const roleName = u.roles?.nodes[0]?.name?.toLowerCase();
+                    let userRole = UserRole.COLLABORATOR;
+                    if (roleName === 'administrator') userRole = UserRole.GLOBAL_ADMIN;
+
+                    return {
+                        id: u.id,
+                        full_name: u.name,
+                        email: u.email,
+                        role: userRole,
+                        avatar_url: null, // WP User avatar needs extra field or gravatar
+                    };
+                });
+
+                setProfiles(mappedUsers);
 
                 // Update Stats
                 setStats({
-                    posts: postsData?.filter(p => p.status === 'published').length || 0,
-                    users: profilesData?.length || 0,
-                    drafts: postsData?.filter(p => p.status === 'draft').length || 0
+                    posts: mappedPosts.filter((p: any) => p.status === 'publish').length || 0,
+                    users: mappedUsers.length || 0,
+                    drafts: mappedPosts.filter((p: any) => p.status === 'draft').length || 0
                 });
 
             } catch (error) {
@@ -352,9 +381,9 @@ export default function AdminDashboard() {
                                 <ul className="space-y-4">
                                     {posts.slice(0, 5).map(post => (
                                         <li key={post.id} className="flex items-center gap-4 text-sm">
-                                            <div className={`w-2 h-2 rounded-full ${post.status === 'published' ? 'bg-green-500' : 'bg-yellow-500'}`}></div>
+                                            <div className={`w-2 h-2 rounded-full ${post.status === 'publish' ? 'bg-green-500' : 'bg-yellow-500'}`}></div>
                                             <span className="text-gray-600">
-                                                {post.author?.full_name || 'Desconocido'} {post.status === 'published' ? 'publicó' : 'creó borrador'} "{post.title}"
+                                                {post.author?.full_name || 'Desconocido'} {post.status === 'publish' ? 'publicó' : 'creó borrador'} "{post.title}"
                                             </span>
                                             <span className="text-gray-400 ml-auto">
                                                 {new Date(post.created_at).toLocaleDateString()}
@@ -375,7 +404,7 @@ export default function AdminDashboard() {
                             {/* Info banner */}
                             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                                 <p className="text-sm text-blue-700">
-                                    <strong>Nota:</strong> Los colaboradores se registran ellos mismos. Solo puedes crear o modificar administradores desde aquí.
+                                    <strong>Nota:</strong> Los usuarios se gestionan principalmente en WordPress.
                                 </p>
                             </div>
 
@@ -406,10 +435,6 @@ export default function AdminDashboard() {
                                 <div className="bg-white rounded-xl shadow-sm border border-gray-100">
                                     <div className="p-4 border-b border-gray-100 flex justify-between items-center">
                                         <h3 className="text-sm font-medium text-gray-800">Administradores del sistema</h3>
-                                        <button className="flex items-center gap-2 px-3 py-1.5 bg-blue-600 text-white rounded-lg text-xs hover:bg-blue-700 transition-colors">
-                                            <Plus className="w-3 h-3" />
-                                            Añadir Admin
-                                        </button>
                                     </div>
                                     <table className="w-full">
                                         <thead className="bg-gray-50 border-b border-gray-200">
@@ -422,7 +447,7 @@ export default function AdminDashboard() {
                                         </thead>
                                         <tbody className="divide-y divide-gray-100">
                                             {profiles
-                                                .filter(p => p.role === UserRole.GLOBAL_ADMIN || p.role === UserRole.CONTENT_ADMIN)
+                                                .filter(p => p.role === UserRole.GLOBAL_ADMIN)
                                                 .map((adminUser) => (
                                                     <tr key={adminUser.id} className="hover:bg-gray-50">
                                                         <td className="px-6 py-4">
@@ -435,23 +460,13 @@ export default function AdminDashboard() {
                                                         </td>
                                                         <td className="px-6 py-4 text-sm text-gray-600">{adminUser.email}</td>
                                                         <td className="px-6 py-4">
-                                                            <span className={`px-2 py-1 text-xs rounded ${adminUser.role === 'GLOBAL_ADMIN'
-                                                                ? 'bg-purple-100 text-purple-700'
-                                                                : 'bg-blue-100 text-blue-700'
-                                                                }`}>
+                                                            <span className={`px-2 py-1 text-xs rounded bg-purple-100 text-purple-700`}>
                                                                 {adminUser.role}
                                                             </span>
                                                         </td>
                                                         <td className="px-6 py-4 text-right">
                                                             <div className="flex items-center justify-end gap-2">
-                                                                <button className="p-2 hover:bg-gray-100 rounded" title="Editar rol">
-                                                                    <Edit className="w-4 h-4 text-gray-500" />
-                                                                </button>
-                                                                {adminUser.email !== user?.email && (
-                                                                    <button className="p-2 hover:bg-gray-100 rounded" title="Revocar acceso">
-                                                                        <Trash2 className="w-4 h-4 text-red-500" />
-                                                                    </button>
-                                                                )}
+                                                                {/* Actions */}
                                                             </div>
                                                         </td>
                                                     </tr>
@@ -466,7 +481,6 @@ export default function AdminDashboard() {
                                 <div className="bg-white rounded-xl shadow-sm border border-gray-100">
                                     <div className="p-4 border-b border-gray-100">
                                         <h3 className="text-sm font-medium text-gray-800">Colaboradores registrados</h3>
-                                        <p className="text-xs text-gray-500 mt-1">Los colaboradores se registran ellos mismos desde la página de login</p>
                                     </div>
                                     <table className="w-full">
                                         <thead className="bg-gray-50 border-b border-gray-200">
@@ -474,7 +488,6 @@ export default function AdminDashboard() {
                                                 <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase">Usuario</th>
                                                 <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase">Email</th>
                                                 <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase">Estado</th>
-                                                <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase">Posts</th>
                                                 <th className="text-right px-6 py-3 text-xs font-medium text-gray-500 uppercase">Acciones</th>
                                             </tr>
                                         </thead>
@@ -497,25 +510,16 @@ export default function AdminDashboard() {
                                                                 Activo
                                                             </span>
                                                         </td>
-                                                        <td className="px-6 py-4 text-sm text-gray-600">- posts</td>
                                                         <td className="px-6 py-4 text-right">
                                                             <div className="flex items-center justify-end gap-2">
-                                                                <button className="p-2 hover:bg-blue-50 rounded" title="Promover a Admin">
-                                                                    <ChevronRight className="w-4 h-4 text-blue-500" />
-                                                                </button>
-                                                                <button className="p-2 hover:bg-gray-100 rounded" title="Ver perfil">
-                                                                    <Eye className="w-4 h-4 text-gray-500" />
-                                                                </button>
-                                                                <button className="p-2 hover:bg-red-50 rounded" title="Desactivar">
-                                                                    <Trash2 className="w-4 h-4 text-red-500" />
-                                                                </button>
+                                                                {/* Actions */}
                                                             </div>
                                                         </td>
                                                     </tr>
                                                 ))}
                                             {profiles.filter(p => p.role === UserRole.COLLABORATOR).length === 0 && (
                                                 <tr>
-                                                    <td colSpan={5} className="px-6 py-8 text-center text-gray-500">
+                                                    <td colSpan={4} className="px-6 py-8 text-center text-gray-500">
                                                         No hay colaboradores registrados.
                                                     </td>
                                                 </tr>
@@ -547,11 +551,11 @@ export default function AdminDashboard() {
                                             <td className="px-6 py-4 text-sm text-gray-600">{post.author?.full_name || 'Desconocido'}</td>
                                             <td className="px-6 py-4 text-sm text-gray-600">{new Date(post.created_at).toLocaleDateString()}</td>
                                             <td className="px-6 py-4">
-                                                <span className={`px-2 py-1 text-xs rounded ${post.status === 'published'
+                                                <span className={`px-2 py-1 text-xs rounded ${post.status === 'publish'
                                                     ? 'bg-green-100 text-green-700'
                                                     : 'bg-yellow-100 text-yellow-700'
                                                     }`}>
-                                                    {post.status === 'published' ? 'Publicado' : 'Borrador'}
+                                                    {post.status === 'publish' ? 'Publicado' : 'Borrador'}
                                                 </span>
                                             </td>
                                             <td className="px-6 py-4 text-right">
