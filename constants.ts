@@ -124,11 +124,11 @@ export const SERVICES: Service[] = [
 ];
 
 export const NAV_LINKS = [
-  { name: 'Inicio', href: '#' },
-  { name: 'Sobre nosotros', href: '#about' },
-  { name: 'Catálogo', href: '#catalog' },
-  { name: 'Journal', href: '#journal' },
-  { name: 'Servicios', href: '#services' },
-  { name: 'Tienda', href: '#' },
-  { name: 'Contacto', href: '#footer' },
+  { name: 'Inicio', href: '/' },
+  { name: 'Sobre nosotros', href: '/#about' },
+  { name: 'Catálogo', href: '/#catalog' },
+  { name: 'Journal', href: '/journal' },
+  { name: 'Servicios', href: '/#services' },
+  { name: 'Tienda', href: '/' },
+  { name: 'Contacto', href: '/#footer' },
 ];

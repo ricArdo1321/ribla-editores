@@ -1,8 +1,57 @@
-import React from 'react';
-import { ArrowRight } from 'lucide-react';
-import { JOURNAL_POSTS, COLORS } from '../constants';
+"use client";
+
+import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { ArrowRight, Loader2 } from 'lucide-react';
+import { COLORS, JOURNAL_POSTS } from '../constants';
+import { supabase } from '@/lib/supabaseClient';
+
+interface Post {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string;
+  category: string;
+  cover_image: string | null;
+  published_at: string;
+}
 
 const Journal: React.FC = () => {
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchPosts = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('posts')
+          .select('id, title, slug, excerpt, category, cover_image, published_at')
+          .eq('status', 'published')
+          .order('published_at', { ascending: false })
+          .limit(4);
+
+        if (error) throw error;
+        if (data) setPosts(data);
+      } catch (err) {
+        console.error('Error fetching posts:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchPosts();
+  }, []);
+
+  // Format date for display
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('es-ES', { month: 'short', year: 'numeric' }).toUpperCase();
+  };
+
+  // Use mock data if no posts from DB
+  const displayPosts = posts.length > 0 ? posts : [];
+  const showMockData = posts.length === 0 && !isLoading;
+
   return (
     <section id="journal" className="py-24 bg-white">
       <div className="max-w-[1400px] mx-auto px-6">
@@ -15,58 +64,118 @@ const Journal: React.FC = () => {
           >
             Journal
           </h2>
-          <a
+          <Link
             href="/journal"
             className="hidden md:flex items-center text-xs tracking-widest text-gray-400 hover:text-[#D96B27] transition-colors mt-4 md:mt-0"
           >
             VER TODOS LOS ARTÍCULOS <ArrowRight size={12} className="ml-2" />
-          </a>
+          </Link>
         </div>
 
-        {/* Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-20">
-          {JOURNAL_POSTS.map((post) => (
-            <article key={post.id} className="group cursor-pointer">
-              <div className="overflow-hidden mb-6 aspect-[16/9] w-full bg-gray-50">
-                <img
-                  src={post.imageUrl}
-                  alt={post.title}
-                  className="w-full h-full object-cover grayscale-[20%] group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700 ease-out"
-                />
-              </div>
+        {/* Loading State */}
+        {isLoading && (
+          <div className="flex justify-center py-20">
+            <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
+          </div>
+        )}
 
-              <div className="flex items-center gap-3 mb-3">
-                <span className="text-[10px] tracking-[0.2em] font-medium text-[#D96B27] uppercase">
-                  {post.category}
-                </span>
-                <span className="w-px h-3 bg-gray-300"></span>
-                <span className="text-[10px] tracking-widest text-gray-400">
-                  {post.date}
-                </span>
-              </div>
+        {/* Grid - Real Posts */}
+        {!isLoading && displayPosts.length > 0 && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-20">
+            {displayPosts.map((post) => (
+              <Link href={`/blog/${post.slug}`} key={post.id}>
+                <article className="group cursor-pointer">
+                  <div className="overflow-hidden mb-6 aspect-[16/9] w-full bg-gray-100">
+                    {post.cover_image ? (
+                      <img
+                        src={post.cover_image}
+                        alt={post.title}
+                        className="w-full h-full object-cover grayscale-[20%] group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700 ease-out"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
+                        <span className="text-6xl font-light text-gray-300">{post.title.charAt(0)}</span>
+                      </div>
+                    )}
+                  </div>
 
-              <h3
-                className="text-xl md:text-2xl font-normal leading-tight mb-3 group-hover:text-[#D96B27] transition-colors"
-                style={{ color: COLORS.ashGray }}
-              >
-                {post.title}
-              </h3>
+                  <div className="flex items-center gap-3 mb-3">
+                    <span className="text-[10px] tracking-[0.2em] font-medium text-[#D96B27] uppercase">
+                      {post.category || 'General'}
+                    </span>
+                    <span className="w-px h-3 bg-gray-300"></span>
+                    <span className="text-[10px] tracking-widest text-gray-400">
+                      {formatDate(post.published_at)}
+                    </span>
+                  </div>
 
-              <p className="text-sm font-light text-gray-400 leading-relaxed max-w-md">
-                {post.excerpt}
+                  <h3
+                    className="text-xl md:text-2xl font-normal leading-tight mb-3 group-hover:text-[#D96B27] transition-colors"
+                    style={{ color: COLORS.ashGray }}
+                  >
+                    {post.title}
+                  </h3>
+
+                  <p className="text-sm font-light text-gray-400 leading-relaxed max-w-md">
+                    {post.excerpt || 'Sin descripción disponible.'}
+                  </p>
+                </article>
+              </Link>
+            ))}
+          </div>
+        )}
+
+        {/* Empty State - Show mock data fallback */}
+        {showMockData && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-20">
+            {JOURNAL_POSTS.slice(0, 4).map((post) => (
+              <article key={post.id} className="group cursor-pointer opacity-60">
+                <div className="overflow-hidden mb-6 aspect-[16/9] w-full bg-gray-50">
+                  <img
+                    src={post.imageUrl}
+                    alt={post.title}
+                    className="w-full h-full object-cover grayscale-[20%] group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700 ease-out"
+                  />
+                </div>
+
+                <div className="flex items-center gap-3 mb-3">
+                  <span className="text-[10px] tracking-[0.2em] font-medium text-[#D96B27] uppercase">
+                    {post.category}
+                  </span>
+                  <span className="w-px h-3 bg-gray-300"></span>
+                  <span className="text-[10px] tracking-widest text-gray-400">
+                    {post.date}
+                  </span>
+                </div>
+
+                <h3
+                  className="text-xl md:text-2xl font-normal leading-tight mb-3 group-hover:text-[#D96B27] transition-colors"
+                  style={{ color: COLORS.ashGray }}
+                >
+                  {post.title}
+                </h3>
+
+                <p className="text-sm font-light text-gray-400 leading-relaxed max-w-md">
+                  {post.excerpt}
+                </p>
+              </article>
+            ))}
+            <div className="col-span-full text-center py-4">
+              <p className="text-sm text-gray-400 italic">
+                Estos son artículos de ejemplo. Publica tu primer post desde el editor.
               </p>
-            </article>
-          ))}
-        </div>
+            </div>
+          </div>
+        )}
 
         {/* Mobile View All Link */}
         <div className="md:hidden mt-12 text-center">
-          <a
+          <Link
             href="/journal"
             className="inline-flex items-center text-xs tracking-widest text-gray-400 hover:text-[#D96B27] transition-colors border-b border-gray-200 pb-1"
           >
             VER JOURNAL <ArrowRight size={12} className="ml-2" />
-          </a>
+          </Link>
         </div>
 
       </div>

@@ -45,7 +45,8 @@ export default function DocumentEditor({
         },
         editorProps: {
             attributes: {
-                class: 'prose prose-lg max-w-none focus:outline-none min-h-[400px]',
+                class: 'prose prose-xl max-w-none focus:outline-none min-h-[400px] font-serif',
+                style: 'font-family: Georgia, "Times New Roman", serif; line-height: 1.8;'
             },
         },
     });
@@ -58,7 +59,7 @@ export default function DocumentEditor({
     };
 
     return (
-        <div className="flex-1 flex flex-col h-full bg-gray-100 overflow-hidden">
+        <div className="flex-1 flex flex-col h-full bg-white overflow-hidden">
             {/* Toolbar */}
             <EditorToolbar editor={editor} />
 
@@ -66,7 +67,7 @@ export default function DocumentEditor({
             <div className="flex-1 overflow-y-auto py-8 px-4">
                 <div className="max-w-3xl mx-auto">
                     {/* Document Card */}
-                    <div className="bg-white shadow-sm rounded-lg p-8 min-h-[600px]">
+                    <div className="bg-white p-8 min-h-[600px]">
                         {/* Title Input */}
                         <input
                             type="text"
