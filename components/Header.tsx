@@ -1,10 +1,13 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { User, ShoppingBag, X } from 'lucide-react';
+import { User, ShoppingBag, X, Shield, ChevronDown } from 'lucide-react';
 import { COLORS, NAV_LINKS } from '../constants';
+import { useAuth } from '@/context/AuthContext';
+import { UserRole } from '@/types/auth';
 
 const Header: React.FC = () => {
+  const { role, debugSetRole } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showLogo, setShowLogo] = useState(false);
 
@@ -64,7 +67,33 @@ const Header: React.FC = () => {
           </div>
 
           {/* Right: Icons */}
-          <div className="flex-1 flex justify-end gap-6">
+          <div className="flex-1 flex justify-end gap-6 items-center">
+
+            {/* Role Switcher (Demo) */}
+            <div className="relative group">
+              <button className="flex items-center gap-2 hover:text-[#D96B27] transition-colors" style={{ color: COLORS.ashGray }}>
+                <Shield size={18} strokeWidth={1.5} />
+                <span className="text-xs uppercase hidden md:inline-block">
+                  {role ? role.replace('_', ' ') : 'Guest'}
+                </span>
+                <ChevronDown size={12} />
+              </button>
+
+              {/* Dropdown */}
+              <div className="absolute right-0 top-full mt-2 w-48 bg-white shadow-lg border border-gray-100 py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
+                <div className="px-4 py-2 text-xs text-gray-400 border-b mb-1">Switch Role (Debug)</div>
+                {Object.values(UserRole).map((r) => (
+                  <button
+                    key={r}
+                    onClick={() => debugSetRole(r)}
+                    className={`w-full text-left px-4 py-2 text-xs hover:bg-gray-50 ${role === r ? 'font-bold text-[#D96B27]' : 'text-gray-600'}`}
+                  >
+                    {r.replace('_', ' ')}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <button className="hidden md:block hover:text-[#D96B27] transition-colors" style={{ color: COLORS.ashGray }}>
               <User size={18} strokeWidth={1.5} />
             </button>

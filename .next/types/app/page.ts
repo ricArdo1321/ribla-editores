@@ -1,4 +1,4 @@
-// File: C:\Users\sqsri\OneDrive\Escritorio\Ricardo\sava ribla editores\proyecto ribla editores version 2\ribla-editores\app\page.tsx
+// File: C:\Users\sqsri\OneDrive\Escritorio\proyecto ribla editores\ribla-editores\app\page.tsx
 import * as entry from '../../../app/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 

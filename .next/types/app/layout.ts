@@ -1,4 +1,4 @@
-// File: C:\Users\sqsri\OneDrive\Escritorio\Ricardo\sava ribla editores\proyecto ribla editores version 2\ribla-editores\app\layout.tsx
+// File: C:\Users\sqsri\OneDrive\Escritorio\proyecto ribla editores\ribla-editores\app\layout.tsx
 import * as entry from '../../../app/layout.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 
