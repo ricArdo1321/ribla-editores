@@ -6,6 +6,8 @@ import Link from 'next/link';
 import { KeyRound, Loader2, CheckCircle, AlertCircle, Eye, EyeOff, Check } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
 
+export const dynamic = 'force-dynamic';
+
 export default function ResetPasswordPage() {
     const router = useRouter();
     const [password, setPassword] = useState('');

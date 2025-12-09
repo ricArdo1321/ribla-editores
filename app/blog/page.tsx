@@ -7,6 +7,8 @@ import { COLORS, JOURNAL_POSTS } from '@/constants';
 import { supabase } from '@/lib/supabaseClient';
 import Header from '@/components/Header';
 
+export const dynamic = 'force-dynamic';
+
 interface Post {
     id: string;
     title: string;

@@ -18,6 +18,8 @@ import {
     ShoppingCart
 } from 'lucide-react';
 
+export const dynamic = 'force-dynamic';
+
 interface Book {
     id: string;
     title: string;

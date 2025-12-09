@@ -31,6 +31,8 @@ const CATEGORIES = [
     'Académico', 'Arte', 'Historia', 'Filosofía', 'Otros'
 ];
 
+export const dynamic = 'force-dynamic';
+
 export default function EditBookPage() {
     const router = useRouter();
     const params = useParams();

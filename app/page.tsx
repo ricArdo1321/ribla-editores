@@ -7,7 +7,8 @@ import Newsletter from '@/components/Newsletter';
 import About from '@/components/About';
 import Footer from '@/components/Footer';
 
-export const revalidate = 3600; // ISR: Revalidate every hour
+// Force dynamic rendering to avoid SSG errors when env vars are not available at build time
+export const dynamic = 'force-dynamic';
 
 export default function Home() {
     return (

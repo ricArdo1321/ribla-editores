@@ -7,6 +7,8 @@ import { Mail, Lock, Eye, EyeOff, Loader2, ArrowLeft } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
 import { COLORS } from '@/constants';
 
+export const dynamic = 'force-dynamic';
+
 export default function LoginPage() {
     const router = useRouter();
     const [email, setEmail] = useState('');

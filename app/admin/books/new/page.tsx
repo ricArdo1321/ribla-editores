@@ -16,6 +16,8 @@ import BookMetadataForm from '@/components/admin/BookMetadataForm';
 import BookPricingSection from '@/components/admin/BookPricingSection';
 import AffiliateLinksSection from '@/components/admin/AffiliateLinksSection';
 
+export const dynamic = 'force-dynamic';
+
 // Constants
 const CATEGORIES = [
     'Narrativa', 'Poesía', 'Ensayo', 'Crónica', 'Infantil',

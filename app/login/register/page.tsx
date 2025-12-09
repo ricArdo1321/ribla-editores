@@ -7,6 +7,8 @@ import { Mail, Lock, User, Eye, EyeOff, Loader2, ArrowLeft, Check } from 'lucide
 import { supabase } from '@/lib/supabaseClient';
 import { COLORS } from '@/constants';
 
+export const dynamic = 'force-dynamic';
+
 export default function RegisterPage() {
     const router = useRouter();
     const [name, setName] = useState('');

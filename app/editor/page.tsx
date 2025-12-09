@@ -9,6 +9,8 @@ import DocumentEditor from '@/components/editor/DocumentEditor';
 import { Loader2, X, CheckCircle, AlertCircle } from 'lucide-react';
 import { sanitizeContent } from '@/lib/sanitize';
 
+export const dynamic = 'force-dynamic';
+
 export default function EditorPage() {
     const router = useRouter();
     const { user, isLoading: authLoading } = useAuth();
