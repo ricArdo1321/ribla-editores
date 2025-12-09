@@ -19,7 +19,7 @@ const Newsletter: React.FC = () => {
     setMessage('');
 
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('leads')
         .insert([{ email, source: 'newsletter' }]);
 

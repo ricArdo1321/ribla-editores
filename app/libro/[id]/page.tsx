@@ -29,11 +29,11 @@ interface Book {
     category: string;
     description: string | null;
     price: number | null;
-    is_digital_only: boolean;
+    is_digital_only: boolean | null;
     cover_url: string | null;
     pdf_url: string | null;
-    affiliate_links: { name: string; url: string }[];
-    status: string;
+    affiliate_links: { name: string; url: string }[] | null;
+    status: string | null;
 }
 
 export default function BookDetailPage() {
@@ -59,7 +59,7 @@ export default function BookDetailPage() {
                     return;
                 }
 
-                setBook(data);
+                setBook(data as unknown as Book);
             } catch (err) {
                 console.error('Unexpected error:', err);
                 setError('Error al cargar el libro');

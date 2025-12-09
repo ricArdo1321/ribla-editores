@@ -28,9 +28,9 @@ interface Book {
     year: number;
     category: string;
     cover_url: string | null;
-    status: string;
+    status: string | null;
     price: number | null;
-    created_at: string;
+    created_at: string | null;
 }
 
 export default function CatalogPage() {
@@ -82,13 +82,13 @@ export default function CatalogPage() {
     }, [authLoading, role]);
 
     // Toggle publish status
-    const togglePublish = async (bookId: string, currentStatus: string) => {
+    const togglePublish = async (bookId: string, currentStatus: string | null) => {
         const newStatus = currentStatus === 'published' ? 'draft' : 'published';
 
         try {
             const { error } = await supabase
                 .from('books')
-                .update({ status: newStatus })
+                .update({ status: newStatus } as any)
                 .eq('id', bookId);
 
             if (error) {
@@ -253,7 +253,7 @@ export default function CatalogPage() {
                                     {/* Hover Actions */}
                                     <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                                         <button
-                                            onClick={() => togglePublish(book.id, book.status)}
+                                            onClick={() => togglePublish(book.id, book.status ?? 'draft')}
                                             className={`p-2 bg-white rounded-full transition-colors ${book.status === 'published'
                                                 ? 'hover:bg-yellow-50'
                                                 : 'hover:bg-green-50'
